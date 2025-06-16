@@ -48,7 +48,6 @@ const distanceRanges = generateDistanceRanges();
 export function ClubConfig({ onSave, initialClubs = defaultClubs, onFinish }: ClubConfigProps) {
   const [clubs, setClubs] = useState<Club[]>(initialClubs);
   const [currentClubIndex, setCurrentClubIndex] = useState(0);
-  const [showHelp, setShowHelp] = useState(false);
 
   const currentClub = clubs[currentClubIndex] || defaultClubs[0];
 
