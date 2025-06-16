@@ -67,7 +67,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Handlers
-  const handleAddTargetArea = (target: any) => {};
+  const handleAddTargetArea = () => {};
   const resetAll = () => {
     setTee(null);
     setFlag(null);

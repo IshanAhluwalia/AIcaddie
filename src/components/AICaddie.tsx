@@ -34,8 +34,6 @@ interface AICaddieProps {
     tips: string;
   };
   onAddTargetArea: (target: TargetArea) => void;
-  teeLocation: [number, number] | null;
-  flagLocation: [number, number] | null;
   playerClubs: Club[];
   mode: 'tee' | 'flag' | 'shot' | null;
   onSetTee: (coords: [number, number]) => void;
@@ -74,7 +72,7 @@ function getDistance(a: [number, number], b: [number, number]) {
 }
 
 export function AICaddie({
-  shots, tee, flag, hole, onAddTargetArea, teeLocation, flagLocation,
+  shots, tee, flag, hole, onAddTargetArea,
   playerClubs, mode, onSetTee, onSetFlag, onAddShot
 }: AICaddieProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
