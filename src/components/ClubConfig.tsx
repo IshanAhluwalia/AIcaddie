@@ -212,7 +212,12 @@ export function ClubConfig({ onSave, initialClubs = defaultClubs, onFinish }: Cl
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between',
-          gap: '16px'
+          gap: '16px',
+          position: 'sticky',
+          bottom: 0,
+          background: 'white',
+          zIndex: 100,
+          paddingBottom: 'env(safe-area-inset-bottom, 12px)'
         }}>
           <button
             onClick={handlePrevious}
@@ -255,6 +260,21 @@ export function ClubConfig({ onSave, initialClubs = defaultClubs, onFinish }: Cl
         }
         button:hover:not(:disabled) {
           filter: brightness(1.1);
+        }
+        @media (max-width: 600px) {
+          .club-config-nav {
+            position: fixed !important;
+            left: 0;
+            bottom: 0;
+            width: 100vw;
+            background: white;
+            z-index: 1000;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+            padding-bottom: env(safe-area-inset-bottom, 12px);
+          }
+          .club-config-content {
+            padding-bottom: 80px !important;
+          }
         }
       `}</style>
     </div>
