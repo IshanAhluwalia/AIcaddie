@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AICaddie } from './components/AICaddie';
 import { ClubConfig } from './components/ClubConfig';
 import { WelcomeScreen } from './components/WelcomeScreen';
@@ -60,23 +60,20 @@ function App() {
   const [flag, setFlag] = useState<[number, number] | null>(null);
   const [shots, setShots] = useState<[number, number][]>([]);
   const [mode, setMode] = useState<'tee' | 'flag' | 'shot' | null>(null);
-  const [scores, setScores] = useState<(number | null)[]>(holes.map(() => null));
   const [holeFinished, setHoleFinished] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [playerClubs, setPlayerClubs] = useState<any[]>([]);
   const [showClubConfig, setShowClubConfig] = useState(false);
-  const [targetAreas, setTargetAreas] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Handlers
-  const handleAddTargetArea = (target: any) => setTargetAreas(prev => [...prev, target]);
+  const handleAddTargetArea = () => {};
   const resetAll = () => {
     setTee(null);
     setFlag(null);
     setShots([]);
     setMode(null);
     setHoleFinished(false);
-    setTargetAreas([]);
   };
 
   if (!gameStarted) {
@@ -154,7 +151,7 @@ function App() {
               <tr key={h.number} style={{ background: idx === selectedHoleIdx ? '#c8e6c9' : 'transparent', fontWeight: idx === selectedHoleIdx ? 600 : 400 }}>
                 <td style={{ padding: 6 }}>{h.number}</td>
                 <td style={{ padding: 6 }}>{h.par}</td>
-                <td style={{ padding: 6 }}>{scores[idx] !== null ? scores[idx] : '-'}</td>
+                <td style={{ padding: 6 }}>-</td>
               </tr>
             ))}
           </tbody>
