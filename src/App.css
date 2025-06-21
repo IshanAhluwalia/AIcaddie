@@ -1,42 +1,261 @@
+/* Reset and base styles */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Main container - fullscreen */
+.app-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Map container - fills entire screen */
+.map-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+/* Mobile menu toggle button */
+.menu-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #1976d2;
+  color: white;
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.menu-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* Mobile overlay panel */
+.mobile-overlay {
+  position: absolute;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  max-width: 400px;
+  height: 100%;
+  background-color: white;
+  z-index: 999;
+  box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+  transition: right 0.3s ease-in-out;
+  overflow-y: auto;
+}
+
+.mobile-overlay.open {
+  right: 0;
+}
+
+.mobile-overlay-content {
+  padding: 20px;
+  padding-top: 80px; /* Space for close button */
+}
+
+.close-overlay {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+/* Section styling */
+.section {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.section h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #1976d2;
+  font-size: 1.1rem;
+}
+
+/* Form controls */
+.section select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+}
+
+/* Buttons */
+.button {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  background-color: #1565c0;
+}
+
+.button.active {
+  background-color: #ef6c00;
+}
+
+.button.danger {
+  background-color: #d32f2f;
+}
+
+.button.danger:hover {
+  background-color: #c62828;
+}
+
+/* Button group for shot controls */
+.button-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* Scorecard table */
+.scorecard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.scorecard-table th,
+.scorecard-table td {
+  padding: 8px;
   text-align: center;
+  border: 1px solid #ddd;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.scorecard-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.scorecard-table .current-hole {
+  background-color: #e3f2fd;
+  font-weight: 600;
+}
+
+/* Shot list */
+.shot-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.shot-list li {
+  padding: 4px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Mode indicator */
+.mode-indicator {
+  background-color: #fff3e0;
+  color: #e65100;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Error banner */
+.error-banner {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(211, 47, 47, 0.9);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  z-index: 1001;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Fullscreen panel for club config */
+.fullscreen-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 2000;
+  overflow-y: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .mobile-overlay {
+    width: 100%;
+    max-width: none;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .menu-toggle {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
   }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  
+  .mobile-overlay-content {
+    padding: 15px;
+    padding-top: 70px;
   }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }

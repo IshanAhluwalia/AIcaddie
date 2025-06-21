@@ -1,246 +1,347 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AICaddie } from './components/AICaddie';
-import { ClubConfig } from './components/ClubConfig';
 import { WelcomeScreen } from './components/WelcomeScreen';
+import './App.css';
 
-const holes = [
+interface Club {
+  name: string;
+  minDistance: number;
+  maxDistance: number;
+  averageDistance: number;
+}
+
+interface Hole {
+  number: number;
+  name: string;
+  geojson: string;
+  par: number;
+  distance: number;
+  tips: string;
+}
+
+interface Course {
+  name: string;
+  description: string;
+  holes: Hole[];
+}
+
+const defaultClubs: Club[] = [
+  { name: 'Driver', minDistance: 200, maxDistance: 280, averageDistance: 240 },
+  { name: '3 Wood', minDistance: 180, maxDistance: 240, averageDistance: 210 },
+  { name: '5 Iron', minDistance: 140, maxDistance: 180, averageDistance: 160 },
+  { name: '7 Iron', minDistance: 120, maxDistance: 160, averageDistance: 140 },
+  { name: '9 Iron', minDistance: 100, maxDistance: 140, averageDistance: 120 },
+  { name: 'Pitching Wedge', minDistance: 80, maxDistance: 120, averageDistance: 100 },
+  { name: 'Sand Wedge', minDistance: 60, maxDistance: 100, averageDistance: 80 },
+  { name: 'Putter', minDistance: 0, maxDistance: 30, averageDistance: 15 }
+];
+
+const courses: Course[] = [
   {
-    number: 1,
-    name: 'Hole 1',
-    geojson: '/hole1.geojson',
-    par: 4,
-    distance: 410,
-    tips: 'Avoid the bunker on the right.'
+    name: 'Vinterbro Golf Course',
+    description: 'A challenging 18-hole course with beautiful scenery and strategic play.',
+    holes: [
+      { 
+        number: 1, 
+        name: 'Opening Drive', 
+        geojson: '/hole1.geojson', 
+        par: 4, 
+        distance: 410, 
+        tips: 'Avoid the bunker on the right. Favor the left side of the fairway for the best approach angle.' 
+      },
+      { 
+        number: 2, 
+        name: 'Water Challenge', 
+        geojson: '/hole2.geojson', 
+        par: 3, 
+        distance: 180, 
+        tips: 'Watch for the water hazard on the left. Club up and aim for the center of the green.' 
+      },
+      { 
+        number: 3, 
+        name: 'Long Par 5', 
+        geojson: '/hole3.geojson', 
+        par: 5, 
+        distance: 520, 
+        tips: 'Long par 5, keep it in the fairway. Two good shots can get you home in two.' 
+      },
+      { 
+        number: 4, 
+        name: 'Dogleg Left', 
+        geojson: '/hole4.geojson', 
+        par: 4, 
+        distance: 390, 
+        tips: 'Dogleg left, favor the right side off the tee. Short iron into an elevated green.' 
+      },
+      { 
+        number: 5, 
+        name: 'Narrow Fairway', 
+        geojson: '/hole5.geojson', 
+        par: 4, 
+        distance: 420, 
+        tips: 'Narrow fairway, accuracy is key off the tee. Bunkers guard the front of the green.' 
+      },
+      { 
+        number: 6, 
+        name: 'Short Par 3', 
+        geojson: '/hole6.geojson', 
+        par: 3, 
+        distance: 175, 
+        tips: 'Short par 3, watch for the bunkers around the green. Pin position is key.' 
+      }
+    ]
   },
   {
-    number: 2,
-    name: 'Hole 2',
-    geojson: '/hole2.geojson',
-    par: 3,
-    distance: 180,
-    tips: 'Watch for the water hazard on the left.'
-  },
-  {
-    number: 3,
-    name: 'Hole 3',
-    geojson: '/hole3.geojson',
-    par: 5,
-    distance: 520,
-    tips: 'Long par 5, keep it in the fairway.'
-  },
-  {
-    number: 4,
-    name: 'Hole 4',
-    geojson: '/hole4.geojson',
-    par: 4,
-    distance: 390,
-    tips: 'Dogleg left, favor the right side off the tee.'
-  },
-  {
-    number: 5,
-    name: 'Hole 5',
-    geojson: '/hole5.geojson',
-    par: 4,
-    distance: 420,
-    tips: 'Narrow fairway, accuracy is key off the tee.'
-  },
-  {
-    number: 6,
-    name: 'Hole 6',
-    geojson: '/hole6.geojson',
-    par: 3,
-    distance: 175,
-    tips: 'Short par 3, watch for the bunkers around the green.'
+    name: 'Demo Course',
+    description: 'A practice course perfect for testing the app features.',
+    holes: [
+      { 
+        number: 1, 
+        name: 'Practice Hole', 
+        geojson: '/demo-hole1.geojson', 
+        par: 4, 
+        distance: 350, 
+        tips: 'Simple straightaway hole perfect for getting started.' 
+      }
+    ]
   }
 ];
 
 function App() {
-  const [selectedHoleIdx, setSelectedHoleIdx] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
+  const [shots, setShots] = useState<[number, number][]>([]);
   const [tee, setTee] = useState<[number, number] | null>(null);
   const [flag, setFlag] = useState<[number, number] | null>(null);
-  const [shots, setShots] = useState<[number, number][]>([]);
   const [mode, setMode] = useState<'tee' | 'flag' | 'shot' | null>(null);
-  const [holeFinished, setHoleFinished] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [playerClubs, setPlayerClubs] = useState<any[]>([]);
-  const [showClubConfig, setShowClubConfig] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [playerClubs, setPlayerClubs] = useState<Club[]>(defaultClubs);
+  const [targetAreas, setTargetAreas] = useState<any[]>([]);
 
-  // Handlers
-  const handleAddTargetArea = () => {};
-  const resetAll = () => {
+  // Load player clubs from localStorage
+  useEffect(() => {
+    const savedClubs = localStorage.getItem('playerClubs');
+    if (savedClubs) {
+      try {
+        const parsedClubs = JSON.parse(savedClubs);
+        if (Array.isArray(parsedClubs)) {
+          setPlayerClubs(parsedClubs);
+        }
+      } catch (e) {
+        console.error("Failed to parse player clubs from localStorage", e);
+      }
+    }
+  }, []);
+
+  const currentHole = selectedCourse?.holes[currentHoleIndex];
+
+  // Reset hole data when changing holes
+  useEffect(() => {
+    setShots([]);
     setTee(null);
     setFlag(null);
-    setShots([]);
     setMode(null);
-    setHoleFinished(false);
+    setTargetAreas([]);
+  }, [currentHoleIndex]);
+
+  const handleStart = () => {
+    setGameStarted(true);
   };
 
+  const handleCourseSelect = (course: Course) => {
+    setSelectedCourse(course);
+    setCurrentHoleIndex(0);
+  };
+
+  const handleSetTee = (coords: [number, number]) => {
+    setTee(coords);
+    setMode(null);
+  };
+
+  const handleSetFlag = (coords: [number, number]) => {
+    setFlag(coords);
+    setMode(null);
+  };
+
+  const handleAddShot = (coords: [number, number]) => {
+    setShots(prev => [...prev, coords]);
+    setMode(null);
+  };
+
+  const handleAddTargetArea = (target: any) => {
+    setTargetAreas(prev => [...prev, target]);
+  };
+
+  const handleSelectHole = (holeIndex: number) => {
+    setCurrentHoleIndex(holeIndex);
+  };
+
+  const handleResetHole = () => {
+    setShots([]);
+    setTee(null);
+    setFlag(null);
+    setMode(null);
+    setTargetAreas([]);
+  };
+
+  const handleSetMode = (newMode: 'tee' | 'flag' | 'shot' | null) => {
+    setMode(newMode);
+  };
+
+  const handleBackToCourseSelection = () => {
+    setSelectedCourse(null);
+    setCurrentHoleIndex(0);
+  };
+
+  const handleBackToWelcome = () => {
+    setGameStarted(false);
+    setSelectedCourse(null);
+    setCurrentHoleIndex(0);
+  };
+
+  // Welcome Screen
   if (!gameStarted) {
-    return <WelcomeScreen onStart={() => setGameStarted(true)} />;
+    return <WelcomeScreen onStart={handleStart} />;
+  }
+
+  // Course Selection Screen
+  if (!selectedCourse) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: '20px',
+        backgroundColor: '#f5f5f5'
+      }}>
+        <div style={{
+          maxWidth: '800px',
+          width: '100%',
+          backgroundColor: 'white',
+          padding: '40px',
+          borderRadius: '16px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+            <h1 style={{ fontSize: '2rem', color: '#1976d2', margin: 0 }}>
+              Select a Course
+            </h1>
+            <button
+              onClick={handleBackToWelcome}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#f5f5f5',
+                color: '#666',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+            >
+              ← Back
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gap: '20px' }}>
+            {courses.map((course, index) => (
+              <div
+                key={index}
+                onClick={() => handleCourseSelect(course)}
+                style={{
+                  padding: '24px',
+                  border: '2px solid #e0e0e0',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  backgroundColor: '#fafafa'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#1976d2';
+                  e.currentTarget.style.backgroundColor = '#f0f7ff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#e0e0e0';
+                  e.currentTarget.style.backgroundColor = '#fafafa';
+                }}
+              >
+                <h3 style={{ margin: '0 0 12px 0', color: '#1976d2', fontSize: '1.3rem' }}>
+                  {course.name}
+                </h3>
+                <p style={{ margin: '0 0 16px 0', color: '#666', lineHeight: '1.5' }}>
+                  {course.description}
+                </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#888', fontSize: '0.9rem' }}>
+                    {course.holes.length} holes
+                  </span>
+                  <span style={{ 
+                    backgroundColor: '#1976d2', 
+                    color: 'white', 
+                    padding: '4px 12px', 
+                    borderRadius: '16px',
+                    fontSize: '0.8rem'
+                  }}>
+                    Select →
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main Game Screen
+  if (!currentHole) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div>Course data loading...</div>
+      </div>
+    );
   }
 
   return (
-    <div style={{ width: '100vw', height: '100vh', display: 'flex', position: 'relative' }}>
-      {/* Hamburger menu for mobile */}
+    <div style={{ position: 'relative' }}>
+      {/* Back to Course Selection Button */}
       <button
-        className="sidebar-toggle"
-        style={{ display: 'none' }}
-        aria-label="Open sidebar"
-        onClick={() => setSidebarOpen(true)}
+        onClick={handleBackToCourseSelection}
+        style={{
+          position: 'absolute',
+          top: '20px',
+          left: '20px',
+          zIndex: 1002,
+          padding: '8px 16px',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          color: '#1976d2',
+          border: '1px solid #1976d2',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontSize: '0.9rem',
+          fontWeight: '500'
+        }}
       >
-        &#9776;
+        ← {selectedCourse.name}
       </button>
-      {/* Sidebar and UI */}
-      <div
-        className={`sidebar${sidebarOpen ? ' open' : ''}`}
-        style={{ width: 300, padding: 20, backgroundColor: '#f5f5f5', overflowY: 'auto' }}
-        onClick={() => setSidebarOpen(false)}
-      >
-        <h1 style={{ marginBottom: 20 }}>AI Caddie</h1>
-        <button
-          onClick={() => setShowClubConfig(!showClubConfig)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            marginBottom: '20px',
-            backgroundColor: '#1976d2',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          {showClubConfig ? 'Hide Club Config' : 'Configure Clubs'}
-        </button>
-        {showClubConfig && (
-          <ClubConfig
-            onSave={(clubs) => {
-              setPlayerClubs(clubs);
-              setShowClubConfig(false);
-              localStorage.setItem('playerClubs', JSON.stringify(clubs));
-            }}
-            initialClubs={playerClubs}
-          />
-        )}
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'block', marginBottom: 5 }}>Select Hole:</label>
-          <select
-            value={selectedHoleIdx}
-            onChange={(e) => setSelectedHoleIdx(parseInt(e.target.value))}
-            style={{ width: '100%', padding: 8 }}
-          >
-            {holes.map((hole, idx) => (
-              <option key={idx} value={idx}>
-                Hole {hole.number} - {hole.name} (Par {hole.par})
-              </option>
-            ))}
-          </select>
-        </div>
-        <h2 style={{ marginTop: 0, marginBottom: 16 }}>Scorecard</h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 16 }}>
-          <thead>
-            <tr style={{ background: '#e0e0e0' }}>
-              <th style={{ padding: 6, borderRadius: 4 }}>Hole</th>
-              <th style={{ padding: 6, borderRadius: 4 }}>Par</th>
-              <th style={{ padding: 6, borderRadius: 4 }}>Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {holes.map((h, idx) => (
-              <tr key={h.number} style={{ background: idx === selectedHoleIdx ? '#c8e6c9' : 'transparent', fontWeight: idx === selectedHoleIdx ? 600 : 400 }}>
-                <td style={{ padding: 6 }}>{h.number}</td>
-                <td style={{ padding: 6 }}>{h.par}</td>
-                <td style={{ padding: 6 }}>-</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {/* Main Panel */}
-      <div className="main-panel" style={{ flex: 1, position: 'relative' }}>
-        <div style={{
-          position: 'absolute', top: 20, left: 20, zIndex: 10, background: 'white', padding: 16, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-        }}>
-          <h2 style={{ margin: 0 }}>{holes[selectedHoleIdx].name}</h2>
-          <div>Par: {holes[selectedHoleIdx].par}</div>
-          <div>Distance: {holes[selectedHoleIdx].distance} yards</div>
-          <div>Tips: {holes[selectedHoleIdx].tips}</div>
-          <div style={{ marginTop: 12 }}>
-            <button
-              onClick={() => setMode('tee')}
-              style={{
-                marginRight: 8,
-                background: mode === 'tee' ? '#1976d2' : '#eee',
-                color: mode === 'tee' ? 'white' : 'black',
-                border: 'none',
-                borderRadius: 4,
-                padding: '6px 12px',
-                cursor: 'pointer'
-              }}
-              disabled={holeFinished}
-            >
-              Set Tee
-            </button>
-            <button
-              onClick={() => setMode('flag')}
-              style={{
-                marginRight: 8,
-                background: mode === 'flag' ? '#43a047' : '#eee',
-                color: mode === 'flag' ? 'white' : 'black',
-                border: 'none',
-                borderRadius: 4,
-                padding: '6px 12px',
-                cursor: 'pointer'
-              }}
-              disabled={holeFinished}
-            >
-              Set Flag
-            </button>
-            <button
-              onClick={() => setMode(mode === 'shot' ? null : 'shot')}
-              style={{
-                marginRight: 8,
-                background: mode === 'shot' ? '#ff9800' : '#eee',
-                color: mode === 'shot' ? 'white' : 'black',
-                border: 'none',
-                borderRadius: 4,
-                padding: '6px 12px',
-                cursor: 'pointer'
-              }}
-              disabled={!tee || !flag || holeFinished}
-            >
-              {mode === 'shot' ? 'Cancel Shot' : 'Add Shot'}
-            </button>
-            <button
-              onClick={resetAll}
-              style={{
-                background: '#d32f2f',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                padding: '6px 12px',
-                cursor: 'pointer'
-              }}
-            >
-              Reset Hole
-            </button>
-          </div>
-        </div>
-        {/* AI Caddie Component */}
-        <AICaddie
-          shots={shots}
-          tee={tee}
-          flag={flag}
-          hole={holes[selectedHoleIdx]}
-          onAddTargetArea={handleAddTargetArea}
-          playerClubs={playerClubs}
-          mode={mode}
-          onSetTee={(coords) => { setTee(coords); setMode(null); }}
-          onSetFlag={(coords) => { setFlag(coords); setMode(null); }}
-          onAddShot={(coords) => setShots(prev => [...prev, coords])}
-        />
-      </div>
+
+      <AICaddie
+        shots={shots}
+        tee={tee}
+        flag={flag}
+        hole={currentHole}
+        playerClubs={playerClubs}
+        mode={mode}
+        onSetTee={handleSetTee}
+        onSetFlag={handleSetFlag}
+        onAddShot={handleAddShot}
+        onAddTargetArea={handleAddTargetArea}
+        onSelectHole={handleSelectHole}
+        onResetHole={handleResetHole}
+        onSetMode={handleSetMode}
+        holes={selectedCourse.holes}
+        currentHoleIndex={currentHoleIndex}
+      />
     </div>
   );
 }
