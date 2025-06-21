@@ -116,7 +116,6 @@ function App() {
   const [flag, setFlag] = useState<[number, number] | null>(null);
   const [mode, setMode] = useState<'tee' | 'flag' | 'shot' | null>(null);
   const [playerClubs, setPlayerClubs] = useState<Club[]>(defaultClubs);
-  const [targetAreas, setTargetAreas] = useState<any[]>([]);
 
   // Load player clubs from localStorage
   useEffect(() => {
@@ -141,7 +140,6 @@ function App() {
     setTee(null);
     setFlag(null);
     setMode(null);
-    setTargetAreas([]);
   }, [currentHoleIndex]);
 
   const handleStart = () => {
@@ -168,9 +166,7 @@ function App() {
     setMode(null);
   };
 
-  const handleAddTargetArea = (target: any) => {
-    setTargetAreas(prev => [...prev, target]);
-  };
+
 
   const handleSelectHole = (holeIndex: number) => {
     setCurrentHoleIndex(holeIndex);
@@ -181,7 +177,6 @@ function App() {
     setTee(null);
     setFlag(null);
     setMode(null);
-    setTargetAreas([]);
   };
 
   const handleSetMode = (newMode: 'tee' | 'flag' | 'shot' | null) => {
@@ -325,23 +320,22 @@ function App() {
         ← {selectedCourse.name}
       </button>
 
-      <AICaddie
-        shots={shots}
-        tee={tee}
-        flag={flag}
-        hole={currentHole}
-        playerClubs={playerClubs}
-        mode={mode}
-        onSetTee={handleSetTee}
-        onSetFlag={handleSetFlag}
-        onAddShot={handleAddShot}
-        onAddTargetArea={handleAddTargetArea}
-        onSelectHole={handleSelectHole}
-        onResetHole={handleResetHole}
-        onSetMode={handleSetMode}
-        holes={selectedCourse.holes}
-        currentHoleIndex={currentHoleIndex}
-      />
+              <AICaddie
+          shots={shots}
+          tee={tee}
+          flag={flag}
+          hole={currentHole}
+          playerClubs={playerClubs}
+          mode={mode}
+          onSetTee={handleSetTee}
+          onSetFlag={handleSetFlag}
+          onAddShot={handleAddShot}
+          onSelectHole={handleSelectHole}
+          onResetHole={handleResetHole}
+          onSetMode={handleSetMode}
+          holes={selectedCourse.holes}
+          currentHoleIndex={currentHoleIndex}
+        />
     </div>
   );
 }

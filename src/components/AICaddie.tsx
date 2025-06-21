@@ -31,7 +31,6 @@ interface AICaddieProps {
   onSetTee: (coords: [number, number]) => void;
   onSetFlag: (coords: [number, number]) => void;
   onAddShot: (coords: [number, number]) => void;
-  onAddTargetArea: (target: any) => void;
   onSelectHole: (holeIndex: number) => void;
   onResetHole: () => void;
   onSetMode: (mode: 'tee' | 'flag' | 'shot' | null) => void;
@@ -40,7 +39,7 @@ interface AICaddieProps {
 }
 
 export function AICaddie({
-  shots, tee, flag, hole, playerClubs, mode, onSetTee, onSetFlag, onAddShot, onAddTargetArea,
+  shots, tee, flag, hole, playerClubs, mode, onSetTee, onSetFlag, onAddShot,
   onSelectHole, onResetHole, onSetMode, holes, currentHoleIndex
 }: AICaddieProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -175,7 +174,7 @@ export function AICaddie({
     return (
       <div className="fullscreen-panel">
         <ClubConfig 
-          onSave={(clubs) => {
+          onSave={() => {
             // Handle saving clubs
             setShowClubConfig(false);
           }} 
