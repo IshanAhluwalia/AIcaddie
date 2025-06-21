@@ -47,6 +47,7 @@ export function AICaddie({
   const [error, setError] = useState<string | null>(null);
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [showClubConfig, setShowClubConfig] = useState(false);
+  const [menuInteracted, setMenuInteracted] = useState(false);
 
 
   // Initialize map
@@ -195,8 +196,11 @@ export function AICaddie({
 
       {/* Menu Toggle Button */}
       <button 
-        className="menu-toggle" 
-        onClick={() => setOverlayOpen(!overlayOpen)}
+        className={`menu-toggle ${menuInteracted ? 'interacted' : ''}`}
+        onClick={() => {
+          setOverlayOpen(!overlayOpen);
+          setMenuInteracted(true);
+        }}
         aria-label="Toggle menu"
       >
         ⛳

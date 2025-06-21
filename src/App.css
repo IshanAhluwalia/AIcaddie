@@ -37,7 +37,7 @@ body {
 
 /* Mobile menu toggle button */
 .menu-toggle {
-  position: absolute;
+  position: fixed;
   top: 20px;
   right: 20px;
   width: 60px;
@@ -46,18 +46,46 @@ body {
   background-color: #1976d2;
   color: white;
   font-size: 1.5rem;
-  border: none;
+  border: 3px solid white;
   cursor: pointer;
-  z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  z-index: 1001;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .menu-toggle:hover {
   transform: scale(1.1);
+  background-color: #1565c0;
+}
+
+.menu-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Pulse animation to help users notice the menu button */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 0 rgba(25, 118, 210, 0.7);
+  }
+  70% {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 10px rgba(25, 118, 210, 0);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 0 rgba(25, 118, 210, 0);
+  }
+}
+
+.menu-toggle {
+  animation: pulse 2s infinite;
+}
+
+/* Stop pulsing after first interaction */
+.menu-toggle.interacted {
+  animation: none;
 }
 
 /* Mobile overlay panel */
@@ -249,13 +277,33 @@ body {
   }
   
   .menu-toggle {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
+    width: 56px;
+    height: 56px;
+    font-size: 1.3rem;
+    top: 15px;
+    right: 15px;
+    border: 2px solid white;
   }
   
   .mobile-overlay-content {
     padding: 15px;
     padding-top: 70px;
+  }
+}
+
+/* Additional mobile improvements */
+@media (max-width: 768px) {
+  .menu-toggle {
+    /* Ensure button is always visible on tablets/phones */
+    position: fixed !important;
+    z-index: 1002 !important;
+  }
+}
+
+/* Safe area adjustments for mobile devices with notches */
+@media (max-width: 480px) {
+  .menu-toggle {
+    top: max(15px, env(safe-area-inset-top));
+    right: max(15px, env(safe-area-inset-right));
   }
 }

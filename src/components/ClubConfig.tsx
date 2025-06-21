@@ -35,11 +35,18 @@ export function ClubConfig({ onSave, initialClubs, onFinish }: ClubConfigProps) 
     onFinish();
   };
 
+  const configuredCount = clubs.filter(club => club.averageDistance > 0).length;
+
   return (
     <div style={{ padding: '20px', height: '100vh', overflow: 'auto', backgroundColor: 'white' }}>
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2>Configure Your Clubs</h2>
+          <div>
+            <h2 style={{ margin: 0 }}>Configure Your Clubs</h2>
+            <p style={{ margin: '4px 0 0 0', color: '#666', fontSize: '0.9rem' }}>
+              {configuredCount} of {clubs.length} clubs configured {configuredCount >= 3 ? '✅' : `(${3 - configuredCount} more needed)`}
+            </p>
+          </div>
           <button onClick={onFinish} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>
             ✕
           </button>
@@ -47,6 +54,17 @@ export function ClubConfig({ onSave, initialClubs, onFinish }: ClubConfigProps) 
 
         <div style={{ marginBottom: '20px' }}>
           <p>Set up your golf clubs with their typical distances. This helps the AI provide better recommendations.</p>
+          <div style={{ 
+            backgroundColor: '#e3f2fd', 
+            border: '1px solid #2196f3', 
+            borderRadius: '8px', 
+            padding: '12px',
+            marginTop: '12px'
+          }}>
+            <p style={{ margin: 0, color: '#1976d2', fontSize: '0.9rem' }}>
+              💡 <strong>Tip:</strong> You only need to configure at least 3 clubs to get started. Fill in the average distance you typically hit with each club.
+            </p>
+          </div>
         </div>
 
         {clubs.map((club, index) => (
@@ -162,16 +180,19 @@ export function ClubConfig({ onSave, initialClubs, onFinish }: ClubConfigProps) 
           <button
             onClick={handleSave}
             style={{
-              backgroundColor: '#43a047',
+              backgroundColor: configuredCount >= 3 ? '#43a047' : '#ccc',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               padding: '12px 20px',
-              cursor: 'pointer',
-              flex: 1
+              cursor: configuredCount >= 3 ? 'pointer' : 'not-allowed',
+              flex: 1,
+              fontSize: '1rem',
+              fontWeight: configuredCount >= 3 ? 'bold' : 'normal'
             }}
+            disabled={configuredCount < 3}
           >
-            Save Configuration
+            {configuredCount >= 3 ? '✅ Save & Continue' : `Save (${3 - configuredCount} more clubs needed)`}
           </button>
           <button
             onClick={onFinish}

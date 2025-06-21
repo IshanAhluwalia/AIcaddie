@@ -38,10 +38,11 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
     if (savedClubs) {
       try {
         const parsedClubs = JSON.parse(savedClubs);
-        if (Array.isArray(parsedClubs) && parsedClubs.length === defaultClubs.length) {
+        if (Array.isArray(parsedClubs)) {
           setPlayerClubs(parsedClubs);
-          const allConfigured = parsedClubs.every(club => club.averageDistance > 0);
-          setClubsConfigured(allConfigured);
+          // Only require at least 3 clubs to be configured (not all)
+          const configuredClubs = parsedClubs.filter(club => club.averageDistance > 0);
+          setClubsConfigured(configuredClubs.length >= 3);
         }
       } catch (error) {
         console.error('Error loading saved clubs:', error);
@@ -54,8 +55,11 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
     try {
       localStorage.setItem('playerClubs', JSON.stringify(clubs));
       setPlayerClubs(clubs);
-      const allConfigured = clubs.every(club => club.averageDistance > 0);
-      setClubsConfigured(allConfigured);
+      // Only require at least 3 clubs to be configured (not all)
+      const configuredClubs = clubs.filter(club => club.averageDistance > 0);
+      const isConfigured = configuredClubs.length >= 3;
+      console.log('Clubs configured:', isConfigured, `${configuredClubs.length} clubs configured`); // Debug log
+      setClubsConfigured(isConfigured);
     } catch (error) {
       console.error('Error saving clubs:', error);
     }
@@ -113,6 +117,20 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
         }}>
           Your AI-powered golf companion. Let's get started by configuring your clubs.
         </p>
+
+        {!clubsConfigured && (
+          <div style={{
+            backgroundColor: '#fff3cd',
+            border: '1px solid #ffeaa7',
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '24px'
+          }}>
+            <p style={{ margin: 0, color: '#856404', fontSize: '1rem' }}>
+              📋 To proceed, you need to configure at least 3 clubs with their average distances.
+            </p>
+          </div>
+        )}
 
         {clubsConfigured ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
